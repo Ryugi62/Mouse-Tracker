@@ -22,12 +22,12 @@ class MouseTrackerApp:
             )
         self.root.iconbitmap(icon_path)
 
-        self.program_list = self.get_program_list()
         self.selected_program = ctk.StringVar()
         self.hwnd = None  # 초기화 시 hwnd를 None으로 설정
 
         self.create_widgets()
         self.update_mouse_position()
+        self.update_program_list_periodically()
 
     def get_program_list(self):
         windows = gw.getAllTitles()
@@ -53,7 +53,7 @@ class MouseTrackerApp:
         self.program_combo = ctk.CTkComboBox(
             self.root,
             variable=self.selected_program,
-            values=self.program_list,
+            values=self.get_program_list(),
             command=self.update_program_handle,  # Use command parameter
             font=("Arial", 14),
         )
@@ -84,7 +84,6 @@ class MouseTrackerApp:
         )
 
     def update_program_handle(self, selected_title):
-        print("hello world")
         print(f"Selected Program: {selected_title}")  # 선택된 프로그램 이름 출력
         self.hwnd = None
         for title in self.get_program_list():
@@ -124,6 +123,13 @@ class MouseTrackerApp:
         self.absolute_label.configure(text=f"Absolute Position: {x}, {y}")
         self.update_program_size_and_position()
         self.root.after(100, self.update_mouse_position)
+
+    def update_program_list_periodically(self):
+        new_program_list = self.get_program_list()
+        current_values = self.program_combo.cget("values")
+        if set(new_program_list) != set(current_values):
+            self.program_combo.configure(values=new_program_list)
+        self.root.after(100, self.update_program_list_periodically)  # 1초마다 업데이트
 
 
 if __name__ == "__main__":
